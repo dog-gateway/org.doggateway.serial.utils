@@ -28,8 +28,7 @@ import gnu.io.SerialPort;
 import gnu.io.UnsupportedCommOperationException;
 
 /**
- * A utility factory for getting a reference to the serial port used for
- * communicating with the physical EnOcean transceiver, initialized with the
+ * A utility factory for getting a reference to the serial port, initialized with the
  * correct parameters.
  * 
  * @author <a href="mailto:dario.bonino@gmail.com">Dario Bonino</a>
@@ -63,10 +62,6 @@ public class SerialPortFactory
 
         try
         {
-
-            // sets the port name (TODO: check if needed)
-            // System.setProperty("gnu.io.rxtx.SerialPorts", "");
-
             // build a port identifier given the port id as a string
             CommPortIdentifier portIdentifier = CommPortIdentifier
                     .getPortIdentifier(portName);
@@ -92,12 +87,7 @@ public class SerialPortFactory
                     // store the serial port reference
                     serialPort = (SerialPort) commPort;
 
-                    // set the serial port parameters according to the ESP3
-                    // specification:
-                    // speed = 57600 bps
-                    // data = 8 byte
-                    // stop bit = 1
-                    // parity = none
+                    // set the serial port parameters
                     serialPort.setSerialPortParams(baudRate, dataBits, stopbits,
                             parity);
                 }
