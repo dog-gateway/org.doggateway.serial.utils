@@ -18,8 +18,6 @@
 
 package org.doggateway.serial;
 
-import org.osgi.service.log.Logger;
-
 import gnu.io.CommPort;
 import gnu.io.CommPortIdentifier;
 import gnu.io.NoSuchPortException;
@@ -27,9 +25,13 @@ import gnu.io.PortInUseException;
 import gnu.io.SerialPort;
 import gnu.io.UnsupportedCommOperationException;
 
+import org.osgi.service.log.Logger;
+
+import java.io.File;
+
 /**
- * A utility factory for getting a reference to the serial port, initialized with the
- * correct parameters.
+ * A utility factory for getting a reference to the serial port, initialized
+ * with the correct parameters.
  * 
  * @author <a href="mailto:dario.bonino@gmail.com">Dario Bonino</a>
  * @authr <a href="mailto:biasiandrea04@gmail.com">Andrea Biasi </a>
@@ -66,6 +68,8 @@ public class SerialPortFactory
             CommPortIdentifier portIdentifier = CommPortIdentifier
                     .getPortIdentifier(portName);
 
+            File portFile = new File(portName);
+
             // check that the port exists and is free
             if (portIdentifier.isCurrentlyOwned())
             {
@@ -73,7 +77,23 @@ public class SerialPortFactory
                 {
                     logger.error("Error: Port is currently in use");
                 }
+
+                throw new PortInUseException();
             }
+            // check that the file pointed by the port name exist, only for
+            // Linux/Unix systems
+            else if (!System.getProperty("os.name").toLowerCase()
+                    .contains("windows") && !portFile.exists())
+            {
+                if (logger != null)
+                {
+                    logger.error("The serial port: {} does not exist",
+                            portFile.getAbsolutePath());
+                }
+
+                throw new NoSuchPortException();
+            }
+            // then try to open the port
             else
             {
                 // open the serial port
@@ -107,7 +127,7 @@ public class SerialPortFactory
             if (logger != null)
             {
                 logger.error("Exception while opening the serial port "
-                        + "for communication:\n {}", e);
+                        + "for communication:\n "+e);
             }
             // rethrow
             throw e;
